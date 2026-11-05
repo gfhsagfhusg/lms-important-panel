@@ -1,0 +1,53 @@
+# 回归测试 CI —— 纯标准库，不执行 pip / npm 安装，也不读写任何真实游戏目录。
+# 运行环境刻意复现本地已验证的组合：Windows + Git Bash + Python 3.13 + Node 22。
+# 两条测试命令与 tests/README.md 保持一致。
+name: 回归测试
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  regression:
+    name: 语法检查 + 44 项回归测试
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Python 3.13（仅运行时，不装依赖）
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: 准备 Node 22（仅运行时，不装依赖）
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Python 语法检查
+        run: |
+          python --version
+          python -c "import pathlib; [compile(pathlib.Path(p).read_text(encoding='utf-8'), p, 'exec') for p in ['install.py', 'tools/bot_item_watch.py', 'tools/litematic_counts.py', 'tests/test_python.py']]"
+
+      - name: JavaScript 语法检查
+        run: |
+          node --version
+          node --check panel/important_panel.js
+          node --check tests/test_panel.js
+
+      - name: Python 回归测试（29 项）
+        run: python -m unittest discover -s tests -p "test_python.py" -v
+
+      - name: 面板回归测试（15 项）
+        run: node tests/test_panel.js

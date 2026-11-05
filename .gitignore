@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+counts*.json
+tests/_work/
+*.ipvtmp
+.ipv_install_snapshot.json
+.ipv-staging/
+.ipv-backup/
