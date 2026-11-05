@@ -15,6 +15,10 @@
 
 为 [Carpet-LMS-Addition](https://github.com/Citrus-Union/Carpet-LMS-Addition) 仓储网站增加一个「重要物品专栏」面板：
 
+[![点击观看完整操作演示](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/video-cover.jpg)](https://www.bilibili.com/video/BV12h4h6iEr9/)
+
+*▶ 点击封面观看完整操作演示（B 站，3 分 49 秒）：安装 → 启动网站 → 面板 → 一键取货。*
+
 ![仓储网站主界面与右侧的「⭐ 重要物品」入口按钮](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/screenshot-site.png)
 
 *安装完成后：网站主界面，右边缘的橙色按钮就是本面板的入口。*
