@@ -15,11 +15,11 @@
 
 为 [Carpet-LMS-Addition](https://github.com/Citrus-Union/Carpet-LMS-Addition) 仓储网站增加一个「重要物品专栏」面板：
 
-![仓储网站主界面与右侧的「⭐ 重要物品」入口按钮](docs/screenshot-site.png)
+![仓储网站主界面与右侧的「⭐ 重要物品」入口按钮](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/screenshot-site.png)
 
 *安装完成后：网站主界面，右边缘的橙色按钮就是本面板的入口。*
 
-![「重要物品专栏」面板：32 类物品、中文名 / 物品 ID / 数量齐全，低于一箱（1728）标红，顶部显示当前存档](docs/screenshot-panel-important-items.png)
+![「重要物品专栏」面板：32 类物品、中文名 / 物品 ID / 数量齐全，低于一箱（1728）标红，顶部显示当前存档](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/screenshot-panel-important-items.png)
 
 *面板展开后的样子：物品按红石机器用量预排序，库存低于一箱整行标红，顶部「当前存档」按存档分别显示。*
 
@@ -128,7 +128,7 @@ python install.py --uninstall 存档名
 
 ## 使用
 
-![仓储网站仪表盘：统计卡片与物品列表，每件物品都可一键取货](docs/screenshot-dashboard.png)
+![仓储网站仪表盘：统计卡片与物品列表，每件物品都可一键取货](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/screenshot-dashboard.png)
 
 1. **登记仓库**：游戏里左手拿金斧右键两个角框选仓库区域，`/wh add` 写入网站（wh-selector 功能；青色高亮 = 已登记容器，`/wh hide` 可关）
 2. **设置密码**：游戏内 `/setPassword 你的密码`
@@ -155,7 +155,7 @@ python install.py --uninstall 存档名
 取货假人把自己装满了，你只拿走一部分就下线，剩下的会一直压在它身上，游戏里又看不见。
 安装器检测到 `<实例>\mcdr-singleplayer` 时，会把 `tools/bot_item_watch.py` 放进 `plugins`：
 
-![假人下线时背包还有东西，聊天框出现的红色「背包未清空」提醒（截图已裁去顶部调试信息）](docs/screenshot-game-bot-getitem.jpg)
+![假人下线时背包还有东西，聊天框出现的红色「背包未清空」提醒（截图已裁去顶部调试信息）](https://cdn.jsdelivr.net/gh/gfhsagfhusg/lms-important-panel@main/docs/screenshot-game-bot-getitem.jpg)
 
 *假人下线时背包还有东西，游戏聊天框就会滚动播报红色「背包未清空」提醒（截图已裁去顶部的坐标 / 种子等调试信息，仅保留警告行）。*
 
