@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 
+# GitHub 的 Windows runner 默认控制台是 cp1252，Python 3.13 非 UTF-8 模式时
+# print 中文会抛 UnicodeEncodeError（安装器/工具会打印中文提示）。强制 UTF-8 输出。
+env:
+  PYTHONUTF8: '1'
+  PYTHONIOENCODING: 'utf-8'
+
 defaults:
   run:
     shell: bash
