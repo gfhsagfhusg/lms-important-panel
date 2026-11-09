@@ -11,19 +11,19 @@ on:
 permissions:
   contents: read
 
-# GitHub 的 Windows runner 默认控制台是 cp1252，Python 3.13 非 UTF-8 模式时
-# print 中文会抛 UnicodeEncodeError（安装器/工具会打印中文提示）。强制 UTF-8 输出。
-env:
-  PYTHONUTF8: '1'
-  PYTHONIOENCODING: 'utf-8'
-
+# GitHub Actions 用管道捕获 stdout，Windows runner 会退回系统 ANSI 代码页(cp1252)；
+# Python 3.13 非 UTF-8 模式下 print 中文会抛 UnicodeEncodeError（安装器/工具会打印中文提示）。
+# 编码只在下列 Python 步骤的 run 内显式固化：step 内 export 是最终赋值，优先级最高，
+# 不依赖 workflow / job 级 env（本次 CI 失败即因顶层 env 在该次运行未生效）。
+# 新增任何 Python 步骤都必须同样在 run 内加这行 export，且不要引用 ${{ env.* }}；
+# 唯一例外是末尾的「cp1252 冒烟回归」step，它故意反向设成 cp1252，加了 utf-8 反而失效。
 defaults:
   run:
     shell: bash
 
 jobs:
   regression:
-    name: 语法检查 + 44 项回归测试
+    name: 语法检查 + 45 项回归测试
     runs-on: windows-latest
     timeout-minutes: 20
 
@@ -43,7 +43,9 @@ jobs:
 
       - name: Python 语法检查
         run: |
+          export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
           python --version
+          python -c "import sys; print('stdout encoding:', sys.stdout.encoding)"
           python -c "import pathlib; [compile(pathlib.Path(p).read_text(encoding='utf-8'), p, 'exec') for p in ['install.py', 'tools/bot_item_watch.py', 'tools/litematic_counts.py', 'tests/test_python.py']]"
 
       - name: JavaScript 语法检查
@@ -52,8 +54,16 @@ jobs:
           node --check panel/important_panel.js
           node --check tests/test_panel.js
 
-      - name: Python 回归测试（29 项）
-        run: python -m unittest discover -s tests -p "test_python.py" -v
+      - name: Python 回归测试（30 项）
+        run: |
+          export PYTHONUTF8=1 PYTHONIOENCODING=utf-8
+          python -m unittest discover -s tests -p "test_python.py" -v
 
       - name: 面板回归测试（15 项）
         run: node tests/test_panel.js
+
+      # 坏环境哨兵：确认测试宿主的 UTF-8 兜底仍生效，且非 UTF-8 locale 下全套可运行。
+      # 它锁「兜底有效性」，锁 import 期副作用靠 test_python.py 里的回归断言；
+      # 放在 job 末尾，避免它失败时因 if: success() 跳过前面的测试结果。
+      - name: cp1252 冒烟回归（防编码兜底失效）
+        run: PYTHONUTF8=0 PYTHONIOENCODING=cp1252 python -m unittest discover -s tests -p "test_python.py" -v

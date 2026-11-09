@@ -16,6 +16,21 @@ import types
 import unittest
 import zipfile
 
+def _ensure_utf8():
+    """测试宿主自保: 仅当 stdout/stderr 不是 UTF-8 家族时才改; 生产模块不做此事。"""
+    for stream in (sys.stdout, sys.stderr):
+        if stream is None:
+            continue
+        try:
+            enc = (stream.encoding or '').lower().replace('-', '')
+            if enc not in ('utf8', 'utf8sig'):
+                stream.reconfigure(encoding='utf-8', errors='backslashreplace')
+        except (AttributeError, ValueError, OSError, TypeError):
+            pass
+
+
+_ensure_utf8()
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORK = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_work')
 sys.path.insert(0, ROOT)
@@ -470,6 +485,42 @@ class TestBotWatch(Base):
         self.assertEqual(bot.load_zh(inst), {})
         self.assertEqual(bot.load_zh(inst), {})
         self.assertNotIn(os.path.abspath(inst), bot._ZH_CACHE)
+
+
+class TestImportSideEffects(unittest.TestCase):
+    def test_production_modules_are_silent_at_import(self):
+        """锁住根因: 生产模块 import 期不得产生任何 stdout/stderr 输出。
+
+        自建捕获流不经过真实 sys.stdout, 因此与 CI 的 PYTHONIOENCODING / 测试宿主
+        的 UTF-8 兜底完全解耦; 即使 workflow 强制 UTF-8, 也能抓到回归。
+        """
+        import contextlib
+        targets = [
+            ('ipv_chk_install', os.path.join(ROOT, 'install.py')),
+            ('ipv_chk_litematic', os.path.join(ROOT, 'tools', 'litematic_counts.py')),
+            ('ipv_chk_bot', os.path.join(ROOT, 'tools', 'bot_item_watch.py')),
+        ]
+        # 强制 numpy 缺失: 否则 except ImportError 块不执行, import 期 print 回归时断言恒真
+        had = 'numpy' in sys.modules
+        saved = sys.modules.get('numpy')
+        sys.modules['numpy'] = None
+        try:
+            for name, path in targets:
+                with self.subTest(module=path):
+                    out, err = io.StringIO(), io.StringIO()
+                    spec = importlib.util.spec_from_file_location(name, path)
+                    mod = importlib.util.module_from_spec(spec)
+                    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                        spec.loader.exec_module(mod)
+                    self.assertEqual(out.getvalue() + err.getvalue(), '',
+                                     '%s import 期不应产生任何输出' % path)
+                    if name == 'ipv_chk_litematic':
+                        self.assertIsNone(mod.np, '必须强制 numpy 缺失，否则断言恒真')
+        finally:
+            if had:
+                sys.modules['numpy'] = saved
+            else:
+                sys.modules.pop('numpy', None)
 
 
 if __name__ == '__main__':

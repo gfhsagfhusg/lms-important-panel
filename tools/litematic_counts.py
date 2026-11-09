@@ -23,8 +23,9 @@ MAX_NBT_ELEMENTS = 4 * 1024 * 1024  # NBT 数组/列表元素上限
 try:
     import numpy as np
 except ImportError:
+    # numpy 可选: 静默降级到 decode_indices_py; import 期禁止 print 中文
+    # (本模块被 tests/test_python.py 用 importlib 直接 exec, cp1252 下中文 print 会 UnicodeEncodeError)
     np = None
-    print("numpy 未安装 -> 使用纯 Python 位流解码(慢一些, 结果一致)", flush=True)
 
 TECHNICAL_SKIP = {
     "minecraft:air", "minecraft:cave_air", "minecraft:void_air",

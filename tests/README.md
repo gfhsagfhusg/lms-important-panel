@@ -18,11 +18,17 @@ node tests/test_panel.js
 python tests/test_python.py
 ```
 
-预期：Python 29 项通过，Node 15 项通过，合计 **44 项**。
+预期：Python 30 项通过，Node 15 项通过，合计 **45 项**。
+
+CI 另有一条坏环境冒烟步骤，验证非 UTF-8 locale 下全套仍可运行（锁的是测试宿主的编码兜底是否仍生效）：
+
+```bash
+PYTHONUTF8=0 PYTHONIOENCODING=cp1252 python -m unittest discover -s tests -p "test_python.py" -v
+```
 
 ## 覆盖内容
 
-### `test_python.py`（29 项）
+### `test_python.py`（30 项）
 
 | 组 | 覆盖点 |
 |---|---|
@@ -34,6 +40,7 @@ python tests/test_python.py
 | T9 世界名 | 中文 `LevelName` 正确读取；损坏的 level.dat 回退到存档文件夹名 |
 | T5 投影统计 | 同名不同 blockstate 累加（2 个活塞算 2）、`TECHNICAL_SKIP` 剔除空气、numpy 与纯 Python 双路径结果全等、解压上限拒绝压缩炸弹 |
 | T6 插件 | 空潜影盒计 1 件并输出「潜影盒×1（空）」、盒内物品×盒数 + 散装混合计数、语言表本地化、`_slot_count` 非法值按 0、消息拆分编号、空语言表不被缓存 |
+| T10 import 期副作用 | 三个生产模块重新 exec 后 stdout/stderr 均无输出；强制 numpy 缺失并自证前置条件，避免断言恒真。自建捕获流不经真实 stdout，即使 CI 强制 UTF-8 也能抓住「import 期中文 print」回归 |
 
 ### `test_panel.js`（15 项）
 
